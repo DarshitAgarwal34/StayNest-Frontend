@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Aptos", "Segoe UI", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  background: #f7f1e8;
+  color: #102a43;
+  font-family: var(--font-sans);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  letter-spacing: -0.04em;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.display-serif {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: -0.05em;
+}
+
+.soft-panel {
+  border: 1px solid rgba(16, 42, 67, 0.08);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 20px 50px rgba(16, 42, 67, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.page-chip {
+  border: 1px solid rgba(16, 42, 67, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 30px rgba(16, 42, 67, 0.08);
+}
+
+.empty-state {
+  border: 1px dashed rgba(82, 96, 109, 0.3);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+@media (max-width: 639px) {
+  h1.display-serif {
+    font-size: 2rem;
+    line-height: 1.05;
+  }
+
+  h2.display-serif {
+    font-size: 1.5rem;
+    line-height: 1.1;
+  }
+
+  h3.display-serif {
+    font-size: 1.25rem;
+    line-height: 1.15;
+  }
+
+  .soft-panel {
+    border-radius: 1.5rem;
+  }
+
+  .page-chip {
+    border-radius: 1rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  h1.display-serif {
+    font-size: 2.75rem;
+    line-height: 1.02;
+  }
+
+  h2.display-serif {
+    font-size: 1.75rem;
+    line-height: 1.1;
+  }
+}
+
+html[data-theme='dark'] body {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+html[data-theme='dark'] .soft-panel {
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.78);
+  box-shadow: 0 24px 70px rgba(2, 6, 23, 0.45);
+}
+
+html[data-theme='dark'] .page-chip {
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.92);
+  color: #e2e8f0;
+}
+
+html[data-theme='dark'] .empty-state {
+  border-color: rgba(148, 163, 184, 0.3);
+  background: rgba(15, 23, 42, 0.68);
+}
