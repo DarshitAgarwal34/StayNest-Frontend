@@ -47,22 +47,22 @@ function ServicesPage() {
 
   return (
     <section className="space-y-8">
-      <div className="soft-panel rounded-[2.25rem] px-6 py-8 sm:px-10">
+      <div className="soft-panel rounded-[2.25rem] px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
         <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">Services</p>
         <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="display-serif text-5xl text-[#102a43] sm:text-6xl">
-              Browse services and request the one you need.
+            <h1 className="display-serif text-3xl text-[#102a43] sm:text-5xl lg:text-6xl">
+              Browse all services in one place.
             </h1>
             <p className="mt-4 max-w-2xl text-[#52606d]">
-              Students can view older service listings, compare offers, and send a live request to the provider.
+              Compare live service listings, check pricing, and send a request when you find the right fit.
             </p>
           </div>
           <Link
-            to="/dashboard"
+            to={user ? '/dashboard' : '/'}
             className="rounded-full bg-[#102a43] px-5 py-3 text-sm font-semibold text-[#f7f1e8]"
           >
-            Back to Dashboard
+            {user ? 'Back to Dashboard' : 'Back Home'}
           </Link>
         </div>
       </div>
@@ -84,7 +84,7 @@ function ServicesPage() {
           <p className="mt-3 text-[#52606d]">Service listings will appear here once providers add them.</p>
         </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {services.map((service) => (
             <article
               key={service.id}

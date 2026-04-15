@@ -42,7 +42,7 @@ export const logoutUser = () => {
 };
 
 const api = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/api`,
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -107,6 +107,11 @@ export const fetchPosts = async () => {
 
 export const fetchServices = async () => {
   const response = await api.get('/services');
+  return response.data;
+};
+
+export const forgotPassword = async (payload) => {
+  const response = await api.post('/auth/forgot-password', payload);
   return response.data;
 };
 

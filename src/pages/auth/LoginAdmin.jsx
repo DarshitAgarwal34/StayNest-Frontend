@@ -64,6 +64,11 @@ function LoginAdmin() {
             className="w-full rounded-[1.25rem] border border-[#102a43]/10 bg-white px-4 py-3 outline-none"
             placeholder="Password"
           />
+          <div className="mt-2 text-right">
+            <Link className="text-xs font-semibold text-[#b45309]" to="/forgot-password/admin">
+              Forgot password?
+            </Link>
+          </div>
         </div>
         {error ? (
           <p className="rounded-[1.25rem] bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">

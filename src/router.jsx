@@ -31,6 +31,7 @@ import LoginStudent from './pages/auth/LoginStudent';
 import LoginRenter from './pages/auth/LoginRenter';
 import LoginService from './pages/auth/LoginService';
 import LoginAdmin from './pages/auth/LoginAdmin';
+import ForgotPasswordPage from './pages/auth/ForgotPassword';
 
 import SignupStudent from './pages/auth/SignupStudent';
 import SignupRenter from './pages/auth/SignupRenter';
@@ -45,14 +46,7 @@ export const router = createBrowserRouter([
       // 🌍 PUBLIC
       { index: true, element: <HomePage /> },
       { path: 'properties', element: <PropertiesPage /> },
-      {
-        path: 'services',
-        element: (
-          <ProtectedRoute allowedRoles={['student', 'renter', 'service_provider', 'admin']}>
-            <ServicesPage />
-          </ProtectedRoute>
-        ),
-      },
+      { path: 'services', element: <ServicesPage /> },
       { path: 'community', element: <CommunityPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'need-help', element: <NeedHelpPage /> },
@@ -64,6 +58,7 @@ export const router = createBrowserRouter([
       { path: 'login/renter', element: <LoginRenter /> },
       { path: 'login/service-provider', element: <LoginService /> },
       { path: 'login/admin', element: <LoginAdmin /> },
+      { path: 'forgot-password/:role', element: <ForgotPasswordPage /> },
 
       // 🔐 ROLE SIGNUP
       { path: 'signup/student', element: <SignupStudent /> },

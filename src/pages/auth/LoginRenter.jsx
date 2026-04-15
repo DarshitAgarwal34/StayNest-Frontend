@@ -65,6 +65,11 @@ function LoginRenter() {
             className="w-full rounded-[1.25rem] border border-[#102a43]/10 bg-white px-4 py-3 outline-none transition focus:border-[#b45309]"
             placeholder="••••••••"
           />
+          <div className="mt-2 text-right">
+            <Link className="text-xs font-semibold text-[#b45309]" to="/forgot-password/renter">
+              Forgot password?
+            </Link>
+          </div>
         </div>
 
         {error ? (

@@ -70,6 +70,7 @@ function MainLayout() {
       return [
         { label: 'Home', to: '/' },
         { label: 'Properties', to: '/properties' },
+        { label: 'Services', to: '/services' },
         { label: 'Community', to: '/community' },
         { label: 'About', to: '/about' },
         { label: 'Help', to: '/need-help' },
