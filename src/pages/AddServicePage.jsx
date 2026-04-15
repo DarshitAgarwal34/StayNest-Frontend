@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { createService } from '../api/api';
@@ -15,6 +15,7 @@ function AddServicePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState('');
+  const [imageName, setImageName] = useState('');
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -24,8 +25,23 @@ function AddServicePage() {
   const handleImageChange = (event) => {
     const file = event.target.files?.[0] || null;
     setForm((current) => ({ ...current, image: file }));
-    setPreview(file ? URL.createObjectURL(file) : '');
+    setImageName(file?.name || '');
+    setPreview((currentPreview) => {
+      if (currentPreview) {
+        URL.revokeObjectURL(currentPreview);
+      }
+
+      return file ? URL.createObjectURL(file) : '';
+    });
   };
+
+  useEffect(() => {
+    return () => {
+      if (preview) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -100,15 +116,26 @@ function AddServicePage() {
 
         <label className="block rounded-[1.25rem] border border-dashed border-[#102a43]/20 bg-[#f7f1e8] px-4 py-4">
           <span className="mb-2 block text-sm font-semibold text-[#102a43]">Service image</span>
-          <input type="file" accept="image/*" onChange={handleImageChange} />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="block w-full cursor-pointer rounded-[1rem] border border-[#102a43]/10 bg-white px-3 py-3 text-sm text-[#52606d] file:mr-4 file:rounded-full file:border-0 file:bg-[#102a43] file:px-4 file:py-2 file:text-sm file:font-semibold file:text-[#f7f1e8]"
+          />
+          <p className="mt-2 text-xs text-[#52606d]">Upload one clear image. It will be shown full-size in the preview below.</p>
         </label>
 
         {preview ? (
-          <img
-            src={preview}
-            alt="Service preview"
-            className="h-56 w-full rounded-[1.5rem] object-cover"
-          />
+          <div className="rounded-[1.5rem] border border-[#102a43]/10 bg-[#f7f1e8] p-3">
+            <p className="mb-3 text-sm font-semibold text-[#102a43]">
+              Selected image{imageName ? `: ${imageName}` : ''}
+            </p>
+            <img
+              src={preview}
+              alt="Service preview"
+              className="max-h-[28rem] w-full rounded-[1.25rem] bg-white object-contain"
+            />
+          </div>
         ) : null}
 
         {error ? <p className="rounded-[1.25rem] bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p> : null}
