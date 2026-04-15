@@ -67,10 +67,10 @@ function ServicesPage() {
         <div className="mt-4 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <h1 className="display-serif text-3xl sm:text-5xl lg:text-6xl">
-              Browse professional services through a clean catalog view.
+              Explore trusted services with a seamless and thoughtfully designed interface.
             </h1>
             <p className="mt-4 max-w-2xl muted-text">
-              Search, sort, and scan up to 30 live service listings, then request the right one without leaving the page.
+              Compare options effortlessly, review key details, and connect with the right service in just a few steps.
             </p>
           </div>
           <div className="panel-muted rounded-[1.75rem] p-5">

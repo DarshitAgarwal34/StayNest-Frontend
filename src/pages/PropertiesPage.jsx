@@ -43,10 +43,10 @@ function PropertiesPage() {
         <div className="mt-4 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <h1 className="display-serif text-5xl sm:text-6xl">
-              Explore available properties with a clean, filter-first view.
+              Find your next stay with clarity, speed, and a refined browsing experience.
             </h1>
             <p className="mt-4 max-w-2xl muted-text">
-              The page now opens with search and sorting first, then shows up to 30 live listings from the backend.
+              Easily navigate curated listings, compare options, and make informed choices with an intuitive interface.
             </p>
           </div>
           <div className="panel-muted rounded-[1.75rem] p-5">

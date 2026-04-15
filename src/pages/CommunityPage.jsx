@@ -91,10 +91,10 @@ function CommunityPage() {
         <div className="mt-4 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
             <h1 className="display-serif text-3xl sm:text-5xl lg:text-6xl">
-              The shared noticeboard stays in place, now with a more professional finish.
+              The shared noticeboard continues to connect the community with a refined experience.
             </h1>
             <p className="mt-4 max-w-2xl muted-text">
-              Posts, rental leads, service updates, and neighborhood conversations still live here, but the experience is now calmer and more polished.
+              PDiscover updates, rental opportunities, service announcements, and local discussions within a more structured and polished environment.
             </p>
           </div>
           <div className="panel-muted rounded-[1.75rem] p-5">
