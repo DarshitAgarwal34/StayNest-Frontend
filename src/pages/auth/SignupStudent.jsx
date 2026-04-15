@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { signupUser } from '../../api/api';
@@ -7,14 +7,7 @@ import { connectSocket } from '../../socket';
 
 function SignupStudent() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phone: '',
-    dob: '',
-    gender: '',
-  });
+  const [form, setForm] = useState({ name: '', email: '', password: '', phone: '', dob: '', gender: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -22,12 +15,8 @@ function SignupStudent() {
     event.preventDefault();
     setLoading(true);
     setError('');
-
     try {
-      await signupUser({
-        ...form,
-        role: 'student',
-      });
+      await signupUser({ ...form, role: 'student' });
       connectSocket();
       navigate('/dashboard');
     } catch (apiError) {
@@ -40,94 +29,24 @@ function SignupStudent() {
   return (
     <AuthShell
       badge="Student signup"
-      title="Create your StayNest profile and start matching smarter."
-      description="Set up a student account to save your preferences, message people directly, and explore nearby living options."
-      accent="student"
-      footer={
-        <p>
-          Already have an account?{' '}
-          <Link className="font-semibold text-[#b45309]" to="/login/student">
-            Sign in here
-          </Link>
-        </p>
-      }
+      title="Create your student account."
+      description="Only the details needed to get you into listings, conversations, and notifications."
+      footer={<p>Already have an account? <Link className="font-semibold text-[var(--accent-strong)]" to="/login/student">Sign in here</Link></p>}
     >
       <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
-        <div className="md:col-span-2">
-          <label className="mb-2 block text-sm font-semibold text-[#102a43]">Name</label>
-          <input
-            required
-            value={form.name}
-            onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))}
-            className="w-full rounded-[1.25rem] border border-[#102a43]/10 bg-white px-4 py-3 outline-none transition focus:border-[#b45309]"
-            placeholder="Your full name"
-          />
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-[#102a43]">Email</label>
-          <input
-            type="email"
-            required
-            value={form.email}
-            onChange={(e) => setForm((current) => ({ ...current, email: e.target.value }))}
-            className="w-full rounded-[1.25rem] border border-[#102a43]/10 bg-white px-4 py-3 outline-none transition focus:border-[#b45309]"
-            placeholder="student@college.edu"
-          />
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-[#102a43]">Phone</label>
-          <input
-            value={form.phone}
-            onChange={(e) => setForm((current) => ({ ...current, phone: e.target.value }))}
-            className="w-full rounded-[1.25rem] border border-[#102a43]/10 bg-white px-4 py-3 outline-none transition focus:border-[#b45309]"
-            placeholder="Phone number"
-          />
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-[#102a43]">Date of birth</label>
-          <input
-            type="date"
-            value={form.dob}
-            onChange={(e) => setForm((current) => ({ ...current, dob: e.target.value }))}
-            className="w-full rounded-[1.25rem] border border-[#102a43]/10 bg-white px-4 py-3 outline-none transition focus:border-[#b45309]"
-          />
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-[#102a43]">Gender</label>
-          <select
-            value={form.gender}
-            onChange={(e) => setForm((current) => ({ ...current, gender: e.target.value }))}
-            className="w-full rounded-[1.25rem] border border-[#102a43]/10 bg-white px-4 py-3 outline-none transition focus:border-[#b45309]"
-          >
-            <option value="">Select</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <div className="md:col-span-2">
-          <label className="mb-2 block text-sm font-semibold text-[#102a43]">Password</label>
-          <input
-            type="password"
-            required
-            value={form.password}
-            onChange={(e) => setForm((current) => ({ ...current, password: e.target.value }))}
-            className="w-full rounded-[1.25rem] border border-[#102a43]/10 bg-white px-4 py-3 outline-none transition focus:border-[#b45309]"
-            placeholder="Create a secure password"
-          />
-        </div>
-
-        {error ? (
-          <p className="md:col-span-2 rounded-[1.25rem] bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">
-            {error}
-          </p>
-        ) : null}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="md:col-span-2 w-full rounded-full bg-[#102a43] px-5 py-3 text-sm font-semibold text-[#f7f1e8] transition hover:bg-[#0b1f33] disabled:cursor-not-allowed disabled:opacity-70"
-        >
+        <input required value={form.name} onChange={(e) => setForm((current) => ({ ...current, name: e.target.value }))} className="field md:col-span-2" placeholder="Full name" />
+        <input type="email" required value={form.email} onChange={(e) => setForm((current) => ({ ...current, email: e.target.value }))} className="field" placeholder="student@college.edu" />
+        <input value={form.phone} onChange={(e) => setForm((current) => ({ ...current, phone: e.target.value }))} className="field" placeholder="Phone number" />
+        <input type="date" value={form.dob} onChange={(e) => setForm((current) => ({ ...current, dob: e.target.value }))} className="field" />
+        <select value={form.gender} onChange={(e) => setForm((current) => ({ ...current, gender: e.target.value }))} className="field-select">
+          <option value="">Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+        <input type="password" required value={form.password} onChange={(e) => setForm((current) => ({ ...current, password: e.target.value }))} className="field md:col-span-2" placeholder="Create password" />
+        {error ? <p className="message-error md:col-span-2 rounded-[1.25rem] px-4 py-3 text-sm font-medium">{error}</p> : null}
+        <button type="submit" disabled={loading} className="primary-button md:col-span-2 w-full rounded-full px-5 py-3 text-sm font-semibold disabled:opacity-70">
           {loading ? 'Creating account...' : 'Create Student Account'}
         </button>
       </form>

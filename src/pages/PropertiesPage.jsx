@@ -1,50 +1,85 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 
 import { fetchProperties } from '../api/api';
 import PropertyGrid from '../components/PropertyGrid';
+import { useLiveCollections } from '../hooks/useLiveCollections';
 
 function PropertiesPage() {
-  const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { items: properties, loading, error } = useLiveCollections('properties', fetchProperties);
+  const [filters, setFilters] = useState({
+    search: '',
+    maxRent: '',
+    sort: 'latest',
+  });
 
-  useEffect(() => {
-    const loadProperties = async () => {
-      try {
-        const response = await fetchProperties();
-        setProperties(response?.data || []);
-      } catch (apiError) {
-        setError(apiError.response?.data?.message || 'Unable to load properties right now.');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const filteredProperties = useMemo(() => {
+    const normalizedSearch = filters.search.trim().toLowerCase();
 
-    loadProperties();
-  }, []);
+    const next = properties.filter((property) => {
+      const matchesSearch = normalizedSearch
+        ? `${property.title || ''} ${property.location || ''} ${property.description || ''}`
+            .toLowerCase()
+            .includes(normalizedSearch)
+        : true;
+      const matchesRent = filters.maxRent ? Number(property.rent || 0) <= Number(filters.maxRent) : true;
+      return matchesSearch && matchesRent;
+    });
+
+    if (filters.sort === 'rent-asc') {
+      return [...next].sort((a, b) => Number(a.rent || 0) - Number(b.rent || 0)).slice(0, 30);
+    }
+
+    if (filters.sort === 'rent-desc') {
+      return [...next].sort((a, b) => Number(b.rent || 0) - Number(a.rent || 0)).slice(0, 30);
+    }
+
+    return next.slice(0, 30);
+  }, [filters, properties]);
 
   return (
     <section className="space-y-8">
-      <div className="soft-panel rounded-[2.25rem] px-6 py-8 sm:px-10">
-        <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#6b8e72]">
-          Properties
-        </p>
-        <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="panel rounded-[2.25rem] px-6 py-8 sm:px-8">
+        <p className="eyebrow">Properties</p>
+        <div className="mt-4 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <h1 className="display-serif text-5xl text-[#102a43] sm:text-6xl">
-              Verified spaces designed for student living.
+            <h1 className="display-serif text-5xl sm:text-6xl">
+              Explore available properties with a clean, filter-first view.
             </h1>
-            <p className="mt-4 max-w-2xl text-[#52606d]">
-              Filter through rooms, rental homes, and shared stays without the old clutter.
+            <p className="mt-4 max-w-2xl muted-text">
+              The page now opens with search and sorting first, then shows up to 30 live listings from the backend.
             </p>
           </div>
-          <div className="page-chip rounded-[1.5rem] px-5 py-4 text-sm font-semibold text-[#102a43]">
-            Images, amenities, and live pricing from the database
+          <div className="panel-muted rounded-[1.75rem] p-5">
+            <div className="grid gap-4 sm:grid-cols-3">
+              <input
+                value={filters.search}
+                onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+                placeholder="Search title or location"
+                className="field sm:col-span-2"
+              />
+              <input
+                type="number"
+                value={filters.maxRent}
+                onChange={(event) => setFilters((current) => ({ ...current, maxRent: event.target.value }))}
+                placeholder="Max rent"
+                className="field"
+              />
+              <select
+                value={filters.sort}
+                onChange={(event) => setFilters((current) => ({ ...current, sort: event.target.value }))}
+                className="field-select sm:col-span-3"
+              >
+                <option value="latest">Latest first</option>
+                <option value="rent-asc">Rent low to high</option>
+                <option value="rent-desc">Rent high to low</option>
+              </select>
+            </div>
+            <p className="mt-4 text-sm muted-text">Showing {filteredProperties.length} of {properties.length} available properties.</p>
           </div>
         </div>
       </div>
 
-      <PropertyGrid properties={properties} loading={loading} error={error} />
+      <PropertyGrid properties={filteredProperties} loading={loading} error={error} />
     </section>
   );
 }

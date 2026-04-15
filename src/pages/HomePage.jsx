@@ -1,209 +1,115 @@
-﻿import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 
 import { fetchPosts, fetchProperties, fetchServices } from '../api/api';
+import {
+  CarouselSection,
+  EmptyPanel,
+  PostCard,
+  PropertyCard,
+  ServiceCard,
+} from '../components/ShowcaseSections';
+import { useLiveCollections } from '../hooks/useLiveCollections';
 
 function HomePage() {
-  const [featured, setFeatured] = useState({
-    properties: [],
-    posts: [],
-    services: [],
-  });
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [propertiesResponse, postsResponse, servicesResponse] = await Promise.all([
-          fetchProperties(),
-          fetchPosts(),
-          fetchServices(),
-        ]);
-
-        setFeatured({
-          properties: (propertiesResponse?.data || []).slice(0, 3),
-          posts: (postsResponse?.data || []).slice(0, 3),
-          services: (servicesResponse?.data || []).slice(0, 3),
-        });
-      } catch {
-        setFeatured({
-          properties: [],
-          posts: [],
-          services: [],
-        });
-      }
-    };
-
-    load();
-  }, []);
+  const { items: properties, loading: propertiesLoading } = useLiveCollections('properties', fetchProperties, { limit: 9 });
+  const { items: services, loading: servicesLoading } = useLiveCollections('services', fetchServices, { limit: 9 });
+  const { items: posts, loading: postsLoading } = useLiveCollections('posts', fetchPosts, { limit: 9 });
 
   return (
-    <section className="space-y-10">
-      <div className="grid items-stretch gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="soft-panel relative overflow-hidden rounded-[2.25rem] px-4 py-6 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
-          <div className="absolute right-0 top-0 h-44 w-44 rounded-full bg-[#d97706]/10 blur-3xl" />
-          <p className="inline-flex rounded-full bg-white px-4 py-1 text-[11px] font-bold uppercase tracking-[0.28em] text-[#b45309]">
-            StayNest Atlas
-          </p>
-          <h1 className="display-serif mt-6 max-w-3xl text-3xl leading-[0.95] text-[#102a43] sm:text-5xl lg:text-7xl">
-            Find a room, a rhythm, and the people who fit your life.
+    <section className="space-y-8">
+      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <section className="panel rounded-[2.4rem] px-6 py-8 sm:px-8 sm:py-10 lg:px-10">
+          <p className="eyebrow">Welcome</p>
+          <h1 className="display-serif mt-4 max-w-4xl text-4xl sm:text-5xl lg:text-6xl">
+            Find places to stay, people to connect with, and services that actually help.
           </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-[#52606d] sm:text-lg">
-            StayNest brings rentals, roommates, services, and real conversations into one calm
-            editorial workspace for students and renters.
+          <p className="mt-5 max-w-2xl text-base leading-8 muted-text sm:text-lg">
+            StayNest now opens with a cleaner catalog-first home. Live listings, live services, and live community posts stay visible in one minimal workspace.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            <Link
-              to="/properties"
-              className="rounded-full bg-[#102a43] px-6 py-3 text-center text-sm font-semibold text-[#f7f1e8] transition hover:-translate-y-0.5 hover:bg-[#0b1f33]"
-            >
-              Explore listings
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link to="/properties" className="primary-button rounded-full px-6 py-3 text-center text-sm font-semibold">
+              Explore properties
             </Link>
-            <Link
-              to="/community"
-              className="rounded-full border border-[#102a43]/10 bg-white px-6 py-3 text-center text-sm font-semibold text-[#102a43] transition hover:-translate-y-0.5"
-            >
-              Open community
+            <Link to="/services" className="outline-button rounded-full px-6 py-3 text-center text-sm font-semibold">
+              Browse services
             </Link>
           </div>
-        </div>
+        </section>
 
-        <div className="grid gap-4">
-          <div className="soft-panel rounded-[2.25rem] p-5 sm:p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">
-              Platform Snapshot
-            </p>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[1.5rem] bg-[#102a43] p-5 text-[#f7f1e8]">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/60">
-                  Listings
-                </p>
-                <p className="mt-4 text-4xl font-black">{String(featured.properties.length).padStart(2, '0')}</p>
-                <p className="mt-2 text-sm text-white/70">featured properties from the backend.</p>
-              </div>
-              <div className="rounded-[1.5rem] bg-[#d97706] p-5 text-[#fffaf2]">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">
-                  Posts
-                </p>
-                <p className="mt-4 text-4xl font-black">{String(featured.posts.length).padStart(2, '0')}</p>
-                <p className="mt-2 text-sm text-white/75">fresh community updates and chatter.</p>
-              </div>
-            </div>
+        <section className="panel rounded-[2.4rem] p-6 sm:p-8">
+          <p className="eyebrow">Platform snapshot</p>
+          <div className="mt-5 space-y-4">
+            {[
+              ['Available listings', properties.length, 'Live backend listings shown on the site.'],
+              ['Available services', services.length, 'Provider services ready to request.'],
+              ['Available posts', posts.length, 'Community updates in the shared feed.'],
+            ].map(([label, value, text]) => (
+              <article key={label} className="panel-muted rounded-[1.4rem] p-4">
+                <p className="text-sm muted-text">{label}</p>
+                <p className="display-serif mt-2 text-4xl">{String(value).padStart(2, '0')}</p>
+                <p className="mt-2 text-sm muted-text">{text}</p>
+              </article>
+            ))}
           </div>
-
-          <div className="soft-panel rounded-[2.25rem] p-5 sm:p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#6b8e72]">
-              Why it works
-            </p>
-            <div className="mt-5 space-y-3">
-              {[
-                'Verified living options with cleaner discovery',
-                'Messaging and community in one shared layer',
-                'Services, preferences, and support without app hopping',
-              ].map((item) => (
-                <div key={item} className="rounded-[1.25rem] bg-white px-4 py-4">
-                  <p className="font-semibold text-[#102a43]">{item}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        </section>
       </div>
 
-      <section className="grid gap-6 lg:grid-cols-3">
-        <div className="soft-panel rounded-[2rem] p-5 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#6b8e72]">
-                Featured properties
-              </p>
-              <h2 className="display-serif mt-2 text-2xl text-[#102a43] sm:text-3xl">
-                Latest rooms on the board
-              </h2>
-            </div>
-            <Link to="/properties" className="text-sm font-semibold text-[#b45309]">
-              View all
-            </Link>
+      <CarouselSection
+        eyebrow="Listings"
+        title="Available properties"
+        description="Up to 9 live properties from the platform."
+        action={<Link to="/properties" className="text-sm font-semibold text-[var(--accent-strong)]">View all properties</Link>}
+      >
+        {propertiesLoading ? (
+          <EmptyPanel title="Loading" description="Fetching available properties." />
+        ) : properties.length ? (
+          <div className="scroll-row">
+            {properties.map((property) => (
+              <PropertyCard key={property.id} property={property} />
+            ))}
           </div>
-          {!featured.properties.length ? (
-            <div className="empty-state mt-6 rounded-[1.5rem] p-8 text-center">
-              <h3 className="display-serif text-2xl sm:text-3xl">Coming Soon</h3>
-              <p className="mt-2 text-sm text-[#52606d]">
-                Property cards will appear here once the backend returns live data.
-              </p>
-            </div>
-          ) : (
-            <div className="mt-6 space-y-4">
-              {featured.properties.map((property) => (
-                <article key={property.id} className="rounded-[1.5rem] bg-white p-5">
-                  <p className="font-semibold text-[#102a43]">{property.title}</p>
-                  <p className="mt-1 text-sm text-[#52606d]">{property.location}</p>
-                  <p className="mt-4 text-2xl font-black text-[#b45309]">Rs {property.rent}</p>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
+        ) : (
+          <EmptyPanel title="No listings yet" description="Property listings will appear here as soon as they are available." />
+        )}
+      </CarouselSection>
 
-        <div className="soft-panel rounded-[2rem] p-5 sm:p-6">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#6b8e72]">
-            Community preview
-          </p>
-          {!featured.posts.length ? (
-            <div className="empty-state mt-6 rounded-[1.5rem] p-8 text-center">
-              <h3 className="display-serif text-2xl sm:text-3xl">Coming Soon</h3>
-              <p className="mt-2 text-sm text-[#52606d]">
-                Posts will appear here as soon as the feed is active.
-              </p>
-            </div>
-          ) : (
-            <div className="mt-6 space-y-4">
-              {featured.posts.map((post) => (
-                <article key={post.id} className="rounded-[1.5rem] bg-white p-5">
-                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#829ab1]">
-                    {post.user?.name || 'StayNest member'}
-                  </p>
-                  <p className="mt-2 text-[#102a43]">{post.content}</p>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
+      <CarouselSection
+        eyebrow="Services"
+        title="Available services"
+        description="Up to 9 live services from the platform."
+        action={<Link to="/services" className="text-sm font-semibold text-[var(--accent-strong)]">View all services</Link>}
+      >
+        {servicesLoading ? (
+          <EmptyPanel title="Loading" description="Fetching available services." />
+        ) : services.length ? (
+          <div className="scroll-row">
+            {services.map((service) => (
+              <ServiceCard key={service.id} service={service} />
+            ))}
+          </div>
+        ) : (
+          <EmptyPanel title="No services yet" description="Service listings will appear here once providers add them." />
+        )}
+      </CarouselSection>
 
-        <div className="soft-panel rounded-[2rem] p-5 sm:p-6">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">
-            Services
-          </p>
-          {!featured.services.length ? (
-            <div className="empty-state mt-6 rounded-[1.5rem] p-8 text-center">
-              <h3 className="display-serif text-2xl sm:text-3xl">Coming Soon</h3>
-              <p className="mt-2 text-sm text-[#52606d]">
-                Service providers will show here when they are listed.
-              </p>
-            </div>
-          ) : (
-            <div className="mt-6 space-y-4">
-              {featured.services.map((service) => (
-                <article key={service.id} className="rounded-[1.5rem] bg-white p-5">
-                  {service.image_url ? (
-                    <img
-                      src={service.image_url}
-                      alt={service.title || 'Service image'}
-                      className="mb-4 h-36 w-full rounded-[1rem] bg-[#f7f1e8] object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : null}
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-semibold text-[#102a43]">{service.title}</p>
-                    <span className="font-black text-[#b45309]">Rs {service.price}</span>
-                  </div>
-                  <p className="mt-2 text-sm text-[#52606d]">{service.location}</p>
-                </article>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      <CarouselSection
+        eyebrow="Community"
+        title="Available posts"
+        description="Up to 9 recent community posts."
+        action={<Link to="/community" className="text-sm font-semibold text-[var(--accent-strong)]">Open community</Link>}
+      >
+        {postsLoading ? (
+          <EmptyPanel title="Loading" description="Fetching community posts." />
+        ) : posts.length ? (
+          <div className="scroll-row">
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </div>
+        ) : (
+          <EmptyPanel title="No posts yet" description="Community posts will appear here as soon as they are shared." />
+        )}
+      </CarouselSection>
     </section>
   );
 }

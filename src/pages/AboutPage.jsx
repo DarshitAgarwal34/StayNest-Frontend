@@ -1,38 +1,36 @@
-function AboutPage() {
+﻿function AboutPage() {
   const blocks = [
     {
       title: 'Vision',
-      text: 'Build the most trusted student accommodation platform for finding rooms, people, and support without broker stress.',
+      text: 'Build a trusted place where students and renters can discover housing, people, and day-to-day support without clutter.',
     },
     {
       title: 'Mission',
-      text: 'Make student living simpler through verified listings, preference-based matching, and a community-led experience.',
+      text: 'Keep listings, services, and community conversations connected in one clear product with real data underneath.',
     },
     {
-      title: 'Why StayNest',
-      text: 'StayNest connects housing, roommate discovery, services, and community in one system instead of scattered tabs.',
+      title: 'Approach',
+      text: 'Minimal design, role-aware workflows, and a calmer user experience that respects how people actually search and decide.',
     },
   ];
 
   return (
     <section className="space-y-8">
-      <div className="soft-panel rounded-[2.25rem] px-6 py-8 sm:px-10">
-        <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">About</p>
-        <h1 className="display-serif mt-4 text-5xl text-[#102a43] sm:text-6xl">
-          A housing product with a calmer point of view.
+      <div className="panel rounded-[2.25rem] px-6 py-8 sm:px-10">
+        <p className="eyebrow">About</p>
+        <h1 className="display-serif mt-4 text-5xl sm:text-6xl">
+          A housing platform designed to feel quiet, clear, and dependable.
         </h1>
-        <p className="mt-4 max-w-3xl text-lg leading-8 text-[#52606d]">
-          StayNest exists to help students discover rooms, connect with compatible people, and manage life around housing with less chaos and more trust.
+        <p className="mt-4 max-w-3xl text-lg leading-8 muted-text">
+          StayNest connects verified places, services, and community activity in a more professional interface that helps people decide faster and with less noise.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         {blocks.map((block) => (
-          <article key={block.title} className="soft-panel rounded-[1.75rem] p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#829ab1]">
-              {block.title}
-            </p>
-            <p className="mt-4 text-base leading-7 text-[#102a43]">{block.text}</p>
+          <article key={block.title} className="panel rounded-[1.75rem] p-6">
+            <p className="eyebrow">{block.title}</p>
+            <p className="mt-4 text-base leading-7">{block.text}</p>
           </article>
         ))}
       </div>

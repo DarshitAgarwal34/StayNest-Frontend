@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import {
   createConversation,
-  fetchConversations,
   fetchAdminOverview,
+  fetchConversations,
   fetchMessages,
   fetchMessagesByConversation,
   fetchNotifications,
@@ -26,9 +26,7 @@ function DashboardPage() {
   const [properties, setProperties] = useState([]);
   const [services, setServices] = useState([]);
   const [adminOverview, setAdminOverview] = useState(null);
-  const [activeConversationId, setActiveConversationId] = useState(
-    () => Number(location.state?.conversationId) || null
-  );
+  const [activeConversationId, setActiveConversationId] = useState(() => Number(location.state?.conversationId) || null);
   const [messageDraft, setMessageDraft] = useState('');
   const [conversationName, setConversationName] = useState('');
   const [conversationMembers, setConversationMembers] = useState('');
@@ -106,19 +104,15 @@ function DashboardPage() {
         type: 'private',
       };
 
-      const next = {
+      map.set(conversationId, {
         ...existing,
         lastMessage: message.message,
         updatedAt: message.created_at,
         sender: message.sender_name || 'StayNest member',
-      };
-
-      map.set(conversationId, next);
+      });
     });
 
-    return Array.from(map.values()).sort(
-      (a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
-    );
+    return Array.from(map.values()).sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
   }, [allMessages, conversationList]);
 
   const role = user?.role || 'student';
@@ -130,7 +124,6 @@ function DashboardPage() {
     }
 
     const socket = connectSocket();
-
     if (selectedConversationId) {
       joinConversation(selectedConversationId);
     }
@@ -150,10 +143,7 @@ function DashboardPage() {
     };
 
     const handleNotification = (notification) => {
-      setLiveNotifications((currentNotifications) => [
-        notification,
-        ...currentNotifications,
-      ].slice(0, 6));
+      setLiveNotifications((currentNotifications) => [notification, ...currentNotifications].slice(0, 6));
     };
 
     socket.on('newMessage', handleMessage);
@@ -182,107 +172,62 @@ function DashboardPage() {
     loadThread();
   }, [selectedConversationId]);
 
-  const cards = [
-    { label: 'Active threads', value: String(conversations.length).padStart(2, '0') },
-    { label: 'Messages', value: String(threadMessages.length).padStart(2, '0') },
-    { label: 'Notifications', value: String(liveNotifications.length).padStart(2, '0') },
-  ];
-
   const ownProperties = properties.filter((property) => Number(property.owner_id) === Number(user?.id));
   const ownServices = services.filter((service) => Number(service.provider_id) === Number(user?.id));
+
+  const renderStats = (stats) => (
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {stats.map(([label, value]) => (
+        <article key={label} className="panel rounded-[1.5rem] p-5">
+          <p className="text-sm muted-text">{label}</p>
+          <p className="display-serif mt-3 text-5xl">{String(value).padStart(2, '0')}</p>
+        </article>
+      ))}
+    </div>
+  );
 
   if (role === 'renter') {
     return (
       <section className="space-y-8">
-        <div className="soft-panel rounded-[2.25rem] px-6 py-8 sm:px-10">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">Dashboard</p>
-          <h1 className="display-serif mt-4 text-5xl text-[#102a43] sm:text-6xl">
-            Renter workspace
-          </h1>
-          <p className="mt-4 max-w-2xl text-[#52606d]">
-            Manage your listings, requests, and active properties without any chat-thread clutter.
-          </p>
+        <div className="panel rounded-[2.25rem] px-6 py-8 sm:px-10">
+          <p className="eyebrow">Renter dashboard</p>
+          <h1 className="display-serif mt-4 text-5xl sm:text-6xl">Manage your listings with less clutter.</h1>
+          <p className="mt-4 max-w-2xl muted-text">Your renter pages now follow the same cleaner layout as the public experience.</p>
         </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <article className="rounded-[1.5rem] bg-[#102a43] p-5 text-white">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">My listings</p>
-            <p className="mt-4 display-serif text-5xl">{String(ownProperties.length).padStart(2, '0')}</p>
-          </article>
-          <article className="rounded-[1.5rem] bg-[#b45309] p-5 text-white">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">Properties</p>
-            <p className="mt-4 display-serif text-5xl">{String(properties.length).padStart(2, '0')}</p>
-          </article>
-          <article className="rounded-[1.5rem] bg-[#6b8e72] p-5 text-white">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">Notifications</p>
-            <p className="mt-4 display-serif text-5xl">{String(liveNotifications.length).padStart(2, '0')}</p>
-          </article>
-        </div>
-
+        {renderStats([
+          ['My listings', ownProperties.length],
+          ['All properties', properties.length],
+          ['Notifications', liveNotifications.length],
+        ])}
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <section className="soft-panel rounded-[2rem] p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">Action</p>
-                <h2 className="display-serif mt-2 text-3xl text-[#102a43]">Publish a property</h2>
-              </div>
-              <Link to="/properties/new" className="rounded-full bg-[#102a43] px-5 py-3 text-center text-sm font-semibold text-[#f7f1e8] sm:text-left">
-                Add Property
-              </Link>
-            </div>
-
-            <div className="mt-6 space-y-3">
-                <Link to="/my-properties" className="block rounded-[1.25rem] bg-white px-4 py-4 font-semibold text-[#102a43]">
-                  View my properties
-                </Link>
-              <Link to="/properties/requests" className="block rounded-[1.25rem] bg-white px-4 py-4 font-semibold text-[#102a43]">
-                Review requests
-              </Link>
-              <Link to="/properties/summary" className="block rounded-[1.25rem] bg-white px-4 py-4 font-semibold text-[#102a43]">
-                View total listings
-              </Link>
+          <section className="panel rounded-[2rem] p-6">
+            <p className="eyebrow">Actions</p>
+            <div className="mt-5 space-y-3">
+              <Link to="/properties/new" className="primary-button block rounded-[1.25rem] px-4 py-4 text-sm font-semibold">Add Property</Link>
+              <Link to="/my-properties" className="outline-button block rounded-[1.25rem] px-4 py-4 text-sm font-semibold">View my properties</Link>
+              <Link to="/properties/requests" className="outline-button block rounded-[1.25rem] px-4 py-4 text-sm font-semibold">Review requests</Link>
             </div>
           </section>
-
-          <section className="soft-panel rounded-[2rem] p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#6b8e72]">My Properties</p>
+          <section className="panel rounded-[2rem] p-6">
+            <p className="eyebrow">My properties</p>
             {!ownProperties.length ? (
               <div className="empty-state mt-5 rounded-[1.5rem] p-8 text-center">
-                <h3 className="display-serif text-3xl">Coming Soon</h3>
-                <p className="mt-2 text-sm text-[#52606d]">Your property listings will appear here once created.</p>
+                <h3 className="display-serif text-3xl">No properties yet</h3>
+                <p className="mt-2 text-sm muted-text">Your property listings will appear here once created.</p>
               </div>
             ) : (
               <div className="mt-5 space-y-4">
-                {ownProperties.map((property) => (
-                  <article key={property.id} className="rounded-[1.25rem] bg-white p-4">
-                    <p className="font-semibold text-[#102a43]">{property.title}</p>
-                    <p className="mt-1 text-sm text-[#52606d]">{property.location}</p>
-                    <p className="mt-3 text-lg font-black text-[#b45309]">Rs {property.rent}</p>
+                {ownProperties.slice(0, 4).map((property) => (
+                  <article key={property.id} className="panel-muted rounded-[1.25rem] p-4">
+                    <p className="font-semibold">{property.title}</p>
+                    <p className="mt-1 text-sm muted-text">{property.location}</p>
+                    <p className="mt-3 text-lg font-semibold">Rs {property.rent}</p>
                   </article>
                 ))}
               </div>
             )}
           </section>
         </div>
-
-        <section className="soft-panel rounded-[2rem] p-6">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">Live notifications</p>
-          {!liveNotifications.length ? (
-            <div className="empty-state mt-5 rounded-[1.5rem] p-8 text-center">
-              <h3 className="display-serif text-3xl">Coming Soon</h3>
-              <p className="mt-2 text-sm text-[#52606d]">Notifications will appear here in real time.</p>
-            </div>
-          ) : (
-            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {liveNotifications.map((notification) => (
-                <article key={notification.id} className="rounded-[1.25rem] bg-white p-4">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b45309]">{notification.type || 'Update'}</p>
-                  <p className="mt-2 text-sm text-[#102a43]">{notification.content}</p>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
       </section>
     );
   }
@@ -290,67 +235,39 @@ function DashboardPage() {
   if (role === 'service_provider') {
     return (
       <section className="space-y-8">
-        <div className="soft-panel rounded-[2.25rem] px-6 py-8 sm:px-10">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">Dashboard</p>
-          <h1 className="display-serif mt-4 text-5xl text-[#102a43] sm:text-6xl">
-            Service provider workspace
-          </h1>
-          <p className="mt-4 max-w-2xl text-[#52606d]">
-            Publish services, track your listings, and handle incoming interest without thread screens.
-          </p>
+        <div className="panel rounded-[2.25rem] px-6 py-8 sm:px-10">
+          <p className="eyebrow">Service dashboard</p>
+          <h1 className="display-serif mt-4 text-5xl sm:text-6xl">Manage your services with a cleaner workspace.</h1>
+          <p className="mt-4 max-w-2xl muted-text">Your provider pages now match the new minimal StayNest theme.</p>
         </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <article className="rounded-[1.5rem] bg-[#102a43] p-5 text-white">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">My services</p>
-            <p className="mt-4 display-serif text-5xl">{String(ownServices.length).padStart(2, '0')}</p>
-          </article>
-          <article className="rounded-[1.5rem] bg-[#d97706] p-5 text-white">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">Services</p>
-            <p className="mt-4 display-serif text-5xl">{String(services.length).padStart(2, '0')}</p>
-          </article>
-          <article className="rounded-[1.5rem] bg-[#6b8e72] p-5 text-white">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">Notifications</p>
-            <p className="mt-4 display-serif text-5xl">{String(liveNotifications.length).padStart(2, '0')}</p>
-          </article>
-        </div>
-
+        {renderStats([
+          ['My services', ownServices.length],
+          ['All services', services.length],
+          ['Notifications', liveNotifications.length],
+        ])}
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <section className="soft-panel rounded-[2rem] p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">Action</p>
-                <h2 className="display-serif mt-2 text-3xl text-[#102a43]">Publish a service</h2>
-              </div>
-              <Link to="/services/new" className="rounded-full bg-[#102a43] px-5 py-3 text-center text-sm font-semibold text-[#f7f1e8] sm:text-left">
-                Add Service
-              </Link>
-            </div>
-
-            <div className="mt-6 space-y-3">
-              <Link to="/my-services" className="block rounded-[1.25rem] bg-white px-4 py-4 font-semibold text-[#102a43]">
-                View my services
-              </Link>
-              <Link to="/services/holders" className="block rounded-[1.25rem] bg-white px-4 py-4 font-semibold text-[#102a43]">
-                Active service holders
-              </Link>
+          <section className="panel rounded-[2rem] p-6">
+            <p className="eyebrow">Actions</p>
+            <div className="mt-5 space-y-3">
+              <Link to="/services/new" className="primary-button block rounded-[1.25rem] px-4 py-4 text-sm font-semibold">Add Service</Link>
+              <Link to="/my-services" className="outline-button block rounded-[1.25rem] px-4 py-4 text-sm font-semibold">View my services</Link>
+              <Link to="/services/holders" className="outline-button block rounded-[1.25rem] px-4 py-4 text-sm font-semibold">Active service holders</Link>
             </div>
           </section>
-
-          <section className="soft-panel rounded-[2rem] p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#6b8e72]">My Services</p>
+          <section className="panel rounded-[2rem] p-6">
+            <p className="eyebrow">My services</p>
             {!ownServices.length ? (
               <div className="empty-state mt-5 rounded-[1.5rem] p-8 text-center">
-                <h3 className="display-serif text-3xl">Coming Soon</h3>
-                <p className="mt-2 text-sm text-[#52606d]">Your service listings will appear here once created.</p>
+                <h3 className="display-serif text-3xl">No services yet</h3>
+                <p className="mt-2 text-sm muted-text">Your service listings will appear here once created.</p>
               </div>
             ) : (
               <div className="mt-5 space-y-4">
-                {ownServices.map((service) => (
-                  <article key={service.id} className="rounded-[1.25rem] bg-white p-4">
-                    <p className="font-semibold text-[#102a43]">{service.title}</p>
-                    <p className="mt-1 text-sm text-[#52606d]">{service.location}</p>
-                    <p className="mt-3 text-lg font-black text-[#b45309]">Rs {service.price}</p>
+                {ownServices.slice(0, 4).map((service) => (
+                  <article key={service.id} className="panel-muted rounded-[1.25rem] p-4">
+                    <p className="font-semibold">{service.title}</p>
+                    <p className="mt-1 text-sm muted-text">{service.location}</p>
+                    <p className="mt-3 text-lg font-semibold">Rs {service.price}</p>
                   </article>
                 ))}
               </div>
@@ -366,46 +283,27 @@ function DashboardPage() {
 
     return (
       <section className="space-y-8">
-        <div className="soft-panel rounded-[2.25rem] px-6 py-8 sm:px-10">
-          <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">Dashboard</p>
-          <h1 className="display-serif mt-4 text-5xl text-[#102a43] sm:text-6xl">
-            Admin control room
-          </h1>
-          <p className="mt-4 max-w-2xl text-[#52606d]">
-            Monitor users, listings, posts, and moderation signals from a single live dashboard.
-          </p>
+        <div className="panel rounded-[2.25rem] px-6 py-8 sm:px-10">
+          <p className="eyebrow">Admin dashboard</p>
+          <h1 className="display-serif mt-4 text-5xl sm:text-6xl">Monitor the platform from one clear control surface.</h1>
+          <p className="mt-4 max-w-2xl muted-text">Users, listings, posts, and reports stay visible without the old visual noise.</p>
         </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {renderStats([
+          ['Total users', counts.totalUsers || 0],
+          ['Total listings', counts.totalListings || 0],
+          ['Total posts', counts.totalPosts || 0],
+        ])}
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           {[
-            ['Total users', counts.totalUsers || 0],
-            ['Total listings', counts.totalListings || 0],
-            ['Total posts', counts.totalPosts || 0],
-            ['Unread alerts', counts.unreadNotifications || 0],
-          ].map(([label, value], index) => (
-            <article key={label} className={`rounded-[1.5rem] p-5 text-white ${index % 2 === 0 ? 'bg-[#102a43]' : 'bg-[#b45309]'}`}>
-              <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">{label}</p>
-              <p className="mt-4 display-serif text-5xl">{String(value).padStart(2, '0')}</p>
-            </article>
-          ))}
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {[
-            ['Manage Students', counts.students || 0, '/admin/users'],
-            ['Manage Renters', counts.renters || 0, '/admin/users'],
-            ['Manage Services', counts.serviceProviders || 0, '/admin/users'],
-            ['Content Moderation', counts.totalComments || 0, '/admin/posts'],
-            ['Remove fake posts', counts.totalPosts || 0, '/admin/posts'],
-            ['Handle complaints', counts.unreadNotifications || 0, '/admin/reports'],
-          ].map(([title, count, href]) => (
-            <article key={title} className="soft-panel rounded-[1.75rem] p-6">
-              <h2 className="display-serif text-3xl text-[#102a43]">{title}</h2>
-              <p className="mt-3 text-sm leading-7 text-[#52606d]">Current count: {count}</p>
-              <Link to={href} className="mt-4 inline-flex rounded-full bg-[#102a43] px-4 py-2 text-sm font-semibold text-[#f7f1e8]">
-                Open
-              </Link>
-            </article>
+            ['Users', '/admin/users'],
+            ['Listings', '/admin/listings'],
+            ['Posts', '/admin/posts'],
+            ['Reports', '/admin/reports'],
+          ].map(([title, href]) => (
+            <Link key={title} to={href} className="panel rounded-[1.75rem] p-6 hover:-translate-y-1">
+              <p className="eyebrow">Open</p>
+              <h2 className="display-serif mt-3 text-3xl">{title}</h2>
+            </Link>
           ))}
         </div>
       </section>
@@ -414,44 +312,30 @@ function DashboardPage() {
 
   const handleSendMessage = async (event) => {
     event.preventDefault();
-
     if (!messageDraft.trim() || !activeConversationId) {
       return;
     }
 
     try {
-      await sendConversationMessage({
-        conversation_id: activeConversationId,
-        message: messageDraft,
-      });
+      await sendConversationMessage({ conversation_id: activeConversationId, message: messageDraft });
       setMessageDraft('');
       const response = await fetchMessagesByConversation(activeConversationId);
       setThreadMessages(response?.data || []);
     } catch {
-      // realtime socket path keeps the thread in sync
+      // socket updates keep the thread moving
     }
   };
 
   const handleCreateThread = async (event) => {
     event.preventDefault();
-
-    const memberIds = conversationMembers
-      .split(',')
-      .map((item) => Number(item.trim()))
-      .filter(Boolean);
-
+    const memberIds = conversationMembers.split(',').map((item) => Number(item.trim())).filter(Boolean);
     if (!memberIds.length) {
       setThreadStatus('Add at least one member ID.');
       return;
     }
 
     try {
-      const response = await createConversation({
-        type: 'private',
-        name: conversationName.trim() || null,
-        member_ids: memberIds,
-      });
-
+      const response = await createConversation({ type: 'private', name: conversationName.trim() || null, member_ids: memberIds });
       const conversation = response?.data;
       if (conversation?.id) {
         setThreadStatus('Thread created successfully.');
@@ -467,199 +351,100 @@ function DashboardPage() {
 
   return (
     <section className="space-y-8">
-      <div className="soft-panel rounded-[2.25rem] px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
-        <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#6b8e72]">
-          Dashboard
-        </p>
-        <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="panel rounded-[2.25rem] px-4 py-6 sm:px-8 sm:py-8 lg:px-10">
+        <p className="eyebrow">Student dashboard</p>
+        <div className="mt-4 grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
-            <h1 className="display-serif text-3xl text-[#102a43] sm:text-4xl lg:text-6xl">
-              Your space, threads, and updates in one calm board.
-            </h1>
-            <p className="mt-4 max-w-2xl text-[#52606d]">
-              Quick messages, live notifications, and your active conversations all sit here without the clutter of a multi-panel app.
-            </p>
+            <h1 className="display-serif text-3xl sm:text-4xl lg:text-6xl">Your student workspace now feels cleaner and more focused.</h1>
+            <p className="mt-4 max-w-2xl muted-text">Messages, notifications, and active threads stay here without the previous cluttered feel.</p>
           </div>
-          <div className="page-chip rounded-[1.5rem] px-4 py-3 text-sm font-semibold text-[#102a43] sm:px-5 sm:py-4">
-            {user?.name || 'Guest'}
+          <div className="panel-muted rounded-[1.75rem] p-5">
+            <p className="text-sm muted-text">Signed in as</p>
+            <p className="display-serif mt-2 text-4xl">{user?.name || 'Student'}</p>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {cards.map((card, index) => (
-          <div
-            key={card.label}
-            className={`rounded-[1.5rem] p-5 text-white shadow-[0_18px_40px_rgba(16,42,67,0.12)] ${
-              index === 0 ? 'bg-[#102a43]' : index === 1 ? 'bg-[#6b8e72]' : 'bg-[#d97706]'
-            }`}
-          >
-            <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">{card.label}</p>
-            <p className="mt-4 display-serif text-3xl sm:text-5xl">{card.value}</p>
-          </div>
-        ))}
-      </div>
+      {renderStats([
+        ['Active threads', conversations.length],
+        ['Messages', threadMessages.length],
+        ['Notifications', liveNotifications.length],
+      ])}
 
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <section className="soft-panel rounded-[2rem] p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">
-                Conversations
-              </p>
-              <h2 className="display-serif mt-2 text-2xl text-[#102a43] sm:text-3xl">
-                Start or open a thread
-              </h2>
-            </div>
-          </div>
-
+        <section className="panel rounded-[2rem] p-6">
+          <p className="eyebrow">Conversations</p>
           <form className="mt-5 space-y-3" onSubmit={handleCreateThread}>
-            <input
-              type="text"
-              value={conversationName}
-              onChange={(event) => setConversationName(event.target.value)}
-              placeholder="Thread name"
-              className="w-full rounded-[1.25rem] border border-[#102a43]/10 bg-white px-4 py-3 outline-none transition focus:border-[#b45309]"
-            />
-            <input
-              type="text"
-              value={conversationMembers}
-              onChange={(event) => setConversationMembers(event.target.value)}
-              placeholder="Member IDs, comma separated"
-              className="w-full rounded-[1.25rem] border border-[#102a43]/10 bg-white px-4 py-3 outline-none transition focus:border-[#b45309]"
-            />
-            <button
-              type="submit"
-              className="w-full rounded-full bg-[#102a43] px-5 py-3 text-sm font-semibold text-[#f7f1e8] transition hover:bg-[#0b1f33]"
-            >
-              Create new thread
-            </button>
-            {threadStatus ? (
-              <p className="rounded-[1.25rem] bg-white px-4 py-3 text-sm text-[#52606d]">{threadStatus}</p>
-            ) : null}
+            <input type="text" value={conversationName} onChange={(event) => setConversationName(event.target.value)} placeholder="Thread name" className="field" />
+            <input type="text" value={conversationMembers} onChange={(event) => setConversationMembers(event.target.value)} placeholder="Member IDs, comma separated" className="field" />
+            <button type="submit" className="primary-button w-full rounded-full px-5 py-3 text-sm font-semibold">Create new thread</button>
+            {threadStatus ? <p className="panel-muted rounded-[1.25rem] px-4 py-3 text-sm muted-text">{threadStatus}</p> : null}
           </form>
 
           <div className="mt-6 space-y-3">
-            {conversations.length ? (
-              conversations.map((conversation) => (
-                <button
-                  key={conversation.id}
-                  type="button"
-                  onClick={async () => {
-                    setActiveConversationId(conversation.id);
-                    joinConversation(conversation.id);
-                    try {
-                      const response = await fetchMessagesByConversation(conversation.id);
-                      setThreadMessages(response?.data || []);
-                    } catch {
-                      setThreadMessages([]);
-                    }
-                  }}
-                  className={`flex w-full items-center justify-between rounded-[1.25rem] px-4 py-4 text-left transition ${
-                    Number(activeConversationId) === Number(conversation.id)
-                      ? 'bg-[#102a43] text-[#f7f1e8]'
-                      : 'bg-white text-[#102a43] hover:-translate-y-0.5'
-                  }`}
-                >
-                  <div>
-                    <span className="block font-semibold">{conversation.name}</span>
-                    <span className="mt-1 block text-xs text-current/70">
-                      {conversation.sender || 'StayNest member'}
-                      {conversation.lastMessage ? `: ${conversation.lastMessage}` : ''}
-                    </span>
-                  </div>
-                  <span className="text-xs uppercase tracking-[0.2em] opacity-70">Open</span>
-                </button>
-              ))
-            ) : (
-              <div className="empty-state rounded-[1.25rem] p-6 text-center text-[#52606d]">
-                <p className="display-serif text-2xl text-[#102a43] sm:text-3xl">Coming Soon</p>
-                <p className="mt-2 text-sm">
-                  Conversations will appear after you create a new thread or receive a message.
-                </p>
+            {conversations.length ? conversations.map((conversation) => (
+              <button
+                key={conversation.id}
+                type="button"
+                onClick={async () => {
+                  setActiveConversationId(conversation.id);
+                  joinConversation(conversation.id);
+                  try {
+                    const response = await fetchMessagesByConversation(conversation.id);
+                    setThreadMessages(response?.data || []);
+                  } catch {
+                    setThreadMessages([]);
+                  }
+                }}
+                className={`w-full rounded-[1.25rem] px-4 py-4 text-left ${Number(activeConversationId) === Number(conversation.id) ? 'primary-button' : 'panel-muted'}`}
+              >
+                <span className="block font-semibold">{conversation.name}</span>
+                <span className="mt-1 block text-xs opacity-70">{conversation.sender || 'StayNest member'}{conversation.lastMessage ? `: ${conversation.lastMessage}` : ''}</span>
+              </button>
+            )) : (
+              <div className="empty-state rounded-[1.25rem] p-6 text-center">
+                <p className="display-serif text-2xl sm:text-3xl">No threads yet</p>
               </div>
             )}
           </div>
         </section>
 
-        <section className="soft-panel rounded-[2rem] p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <section className="panel rounded-[2rem] p-6">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#6b8e72]">
-                Thread
-              </p>
-              <h2 className="display-serif mt-2 text-2xl text-[#102a43] sm:text-3xl">
-                Conversation-based chat
-              </h2>
+              <p className="eyebrow">Thread</p>
+              <h2 className="display-serif mt-2 text-2xl sm:text-3xl">Conversation</h2>
             </div>
-            <div className="page-chip rounded-full px-4 py-2 text-sm font-semibold text-[#102a43]">
+            <div className="panel-muted rounded-full px-4 py-2 text-sm font-semibold">
               {activeConversationId ? `#${activeConversationId}` : 'No thread selected'}
             </div>
           </div>
 
           {!threadMessages.length ? (
             <div className="empty-state mt-6 rounded-[1.5rem] p-8 text-center">
-              <h3 className="display-serif text-2xl sm:text-3xl">Coming Soon</h3>
-              <p className="mt-2 text-sm text-[#52606d]">
-                Your active thread will appear here once messages are available.
-              </p>
+              <h3 className="display-serif text-2xl sm:text-3xl">No messages yet</h3>
+              <p className="mt-2 text-sm muted-text">Your active thread will appear here once messages are available.</p>
             </div>
           ) : (
             <div className="mt-6 space-y-4">
               {threadMessages.map((message) => (
-                <article key={message.id} className="rounded-[1.25rem] bg-white p-4">
-                  <div className="flex items-center justify-between gap-3 text-xs uppercase tracking-[0.24em] text-[#829ab1]">
+                <article key={message.id} className="panel-muted rounded-[1.25rem] p-4">
+                  <div className="flex items-center justify-between gap-3 text-xs uppercase tracking-[0.24em] faint-text">
                     <span>{message.sender_name || 'Sender'}</span>
                     <span>Conversation {message.conversation_id}</span>
                   </div>
-                  <p className="mt-3 text-[#102a43]">{message.message}</p>
+                  <p className="mt-3">{message.message}</p>
                 </article>
               ))}
             </div>
           )}
 
           <form className="mt-6 grid gap-3 sm:grid-cols-[1fr_auto]" onSubmit={handleSendMessage}>
-            <input
-              type="text"
-              value={messageDraft}
-              onChange={(event) => setMessageDraft(event.target.value)}
-              placeholder="Write a message"
-              className="rounded-full border border-[#102a43]/10 bg-white px-4 py-3 outline-none transition focus:border-[#b45309]"
-            />
-            <button
-              type="submit"
-              className="rounded-full bg-[#102a43] px-5 py-3 text-sm font-semibold text-[#f7f1e8] transition hover:bg-[#0b1f33] sm:w-auto w-full"
-            >
-              Send
-            </button>
+            <input type="text" value={messageDraft} onChange={(event) => setMessageDraft(event.target.value)} placeholder="Write a message" className="field rounded-full" />
+            <button type="submit" className="primary-button rounded-full px-5 py-3 text-sm font-semibold">Send</button>
           </form>
         </section>
       </div>
-
-      <section className="soft-panel rounded-[2rem] p-6">
-        <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">
-          Live notifications
-        </p>
-        {!liveNotifications.length ? (
-          <div className="empty-state mt-5 rounded-[1.5rem] p-8 text-center">
-            <h3 className="display-serif text-2xl sm:text-3xl">Coming Soon</h3>
-            <p className="mt-2 text-sm text-[#52606d]">
-              Notifications will show up here in real time.
-            </p>
-          </div>
-        ) : (
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {liveNotifications.map((notification) => (
-              <article key={notification.id} className="rounded-[1.25rem] bg-white p-4">
-                <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b45309]">
-                  {notification.type || 'Update'}
-                </p>
-                <p className="mt-2 text-sm text-[#102a43]">{notification.content}</p>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
     </section>
   );
 }

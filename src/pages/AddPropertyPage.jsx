@@ -1,21 +1,14 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { createProperty, fetchAmenities } from '../api/api';
+import { emitCollectionChanged } from '../hooks/useLiveCollections';
 
 function AddPropertyPage() {
   const navigate = useNavigate();
   const [amenities, setAmenities] = useState([]);
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    location: '',
-    rent: '',
-    max_sharing: '1',
-    amenity_ids: [],
-    images: [],
-  });
-  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ title: '', description: '', location: '', rent: '', max_sharing: '1', amenity_ids: [], images: [] });
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -45,18 +38,13 @@ function AddPropertyPage() {
       const exists = current.amenity_ids.includes(amenityId);
       return {
         ...current,
-        amenity_ids: exists
-          ? current.amenity_ids.filter((id) => id !== amenityId)
-          : [...current.amenity_ids, amenityId],
+        amenity_ids: exists ? current.amenity_ids.filter((id) => id !== amenityId) : [...current.amenity_ids, amenityId],
       };
     });
   };
 
   const handleFiles = (event) => {
-    setForm((current) => ({
-      ...current,
-      images: Array.from(event.target.files || []),
-    }));
+    setForm((current) => ({ ...current, images: Array.from(event.target.files || []) }));
   };
 
   const handleSubmit = async (event) => {
@@ -66,11 +54,8 @@ function AddPropertyPage() {
     setSuccess('');
 
     try {
-      await createProperty({
-        ...form,
-        rent: Number(form.rent),
-        max_sharing: Number(form.max_sharing),
-      });
+      await createProperty({ ...form, rent: Number(form.rent), max_sharing: Number(form.max_sharing) });
+      emitCollectionChanged('properties');
       setSuccess('Property published successfully.');
       navigate('/my-properties');
     } catch (apiError) {
@@ -82,104 +67,49 @@ function AddPropertyPage() {
 
   return (
     <section className="space-y-8">
-      <div className="soft-panel rounded-[2.25rem] px-6 py-8 sm:px-10">
-        <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#b45309]">Renter</p>
-        <h1 className="display-serif mt-4 text-5xl text-[#102a43] sm:text-6xl">
-          Add a property listing.
-        </h1>
-        <p className="mt-4 max-w-2xl text-[#52606d]">
-          Publish a real property with images, rent, sharing limits, and amenities.
-        </p>
+      <div className="panel rounded-[2.25rem] px-6 py-8 sm:px-10">
+        <p className="eyebrow">Renter</p>
+        <h1 className="display-serif mt-4 text-5xl sm:text-6xl">Add a property listing.</h1>
+        <p className="mt-4 max-w-2xl muted-text">Publish a real property with images, rent, sharing limits, and amenities.</p>
       </div>
 
-      <form
-        className="grid gap-5 rounded-[2rem] border border-[#102a43]/8 bg-white p-6 shadow-[0_16px_40px_rgba(16,42,67,0.06)]"
-        onSubmit={handleSubmit}
-      >
+      <form className="panel-strong grid gap-5 rounded-[2rem] p-6" onSubmit={handleSubmit}>
         <div className="grid gap-4 md:grid-cols-2">
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            placeholder="Property title"
-            className="w-full rounded-[1.25rem] border border-[#102a43]/10 px-4 py-3"
-            required
-          />
-          <input
-            name="location"
-            value={form.location}
-            onChange={handleChange}
-            placeholder="Location"
-            className="w-full rounded-[1.25rem] border border-[#102a43]/10 px-4 py-3"
-            required
-          />
-          <input
-            name="rent"
-            type="number"
-            value={form.rent}
-            onChange={handleChange}
-            placeholder="Rent"
-            className="w-full rounded-[1.25rem] border border-[#102a43]/10 px-4 py-3"
-            required
-          />
-          <input
-            name="max_sharing"
-            type="number"
-            min="1"
-            value={form.max_sharing}
-            onChange={handleChange}
-            placeholder="Max sharing"
-            className="w-full rounded-[1.25rem] border border-[#102a43]/10 px-4 py-3"
-          />
+          <input name="title" value={form.title} onChange={handleChange} placeholder="Property title" className="field" required />
+          <input name="location" value={form.location} onChange={handleChange} placeholder="Location" className="field" required />
+          <input name="rent" type="number" value={form.rent} onChange={handleChange} placeholder="Rent" className="field" required />
+          <input name="max_sharing" type="number" min="1" value={form.max_sharing} onChange={handleChange} placeholder="Max sharing" className="field" />
         </div>
 
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={handleChange}
-          placeholder="Property description"
-          rows="5"
-          className="w-full rounded-[1.25rem] border border-[#102a43]/10 px-4 py-3"
-        />
+        <textarea name="description" value={form.description} onChange={handleChange} placeholder="Property description" rows="5" className="field-area" />
 
-        <label className="block rounded-[1.25rem] border border-dashed border-[#102a43]/20 bg-[#f7f1e8] px-4 py-4">
-          <span className="mb-2 block text-sm font-semibold text-[#102a43]">Property images</span>
-          <input type="file" multiple accept="image/*" onChange={handleFiles} />
+        <label className="panel-muted block rounded-[1.25rem] px-4 py-4">
+          <span className="mb-2 block text-sm font-semibold">Property images</span>
+          <input type="file" multiple accept="image/*" onChange={handleFiles} className="block w-full text-sm" />
         </label>
 
         <div>
-          <p className="mb-3 text-sm font-semibold text-[#102a43]">Amenities</p>
+          <p className="mb-3 text-sm font-semibold">Amenities</p>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {loading ? (
-              <div className="text-sm text-[#52606d]">Loading amenities...</div>
+              <div className="text-sm muted-text">Loading amenities...</div>
             ) : amenities.length ? (
               amenities.map((amenity) => (
-                <label
-                  key={amenity.id}
-                  className="flex items-center gap-3 rounded-[1rem] border border-[#102a43]/10 px-4 py-3"
-                >
-                  <input
-                    type="checkbox"
-                    checked={form.amenity_ids.includes(Number(amenity.id))}
-                    onChange={() => handleAmenityToggle(Number(amenity.id))}
-                  />
+                <label key={amenity.id} className="panel-muted flex items-center gap-3 rounded-[1rem] px-4 py-3">
+                  <input type="checkbox" checked={form.amenity_ids.includes(Number(amenity.id))} onChange={() => handleAmenityToggle(Number(amenity.id))} />
                   <span>{amenity.name}</span>
                 </label>
               ))
             ) : (
-              <div className="text-sm text-[#52606d]">No amenities found.</div>
+              <div className="text-sm muted-text">No amenities found.</div>
             )}
           </div>
         </div>
 
-        {error ? <p className="rounded-[1.25rem] bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p> : null}
-        {success ? <p className="rounded-[1.25rem] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{success}</p> : null}
+        {error ? <p className="message-error rounded-[1.25rem] px-4 py-3 text-sm">{error}</p> : null}
+        {success ? <p className="message-success rounded-[1.25rem] px-4 py-3 text-sm">{success}</p> : null}
 
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-full bg-[#102a43] px-5 py-3 text-sm font-semibold text-[#f7f1e8]"
-        >
+        <button type="submit" disabled={saving} className="primary-button rounded-full px-5 py-3 text-sm font-semibold">
           {saving ? 'Publishing...' : 'Publish Property'}
         </button>
       </form>
