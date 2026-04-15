@@ -57,7 +57,7 @@ function HomePage() {
       <CarouselSection
         eyebrow="Listings"
         title="Available properties"
-        description="Up to 9 live properties from the platform."
+        description="Featured properties from the platform."
         action={<Link to="/properties" className="text-sm font-semibold text-[var(--accent-strong)]">View all properties</Link>}
       >
         {propertiesLoading ? (
@@ -76,7 +76,7 @@ function HomePage() {
       <CarouselSection
         eyebrow="Services"
         title="Available services"
-        description="Up to 9 live services from the platform."
+        description="Featured services from the platform."
         action={<Link to="/services" className="text-sm font-semibold text-[var(--accent-strong)]">View all services</Link>}
       >
         {servicesLoading ? (
@@ -95,7 +95,7 @@ function HomePage() {
       <CarouselSection
         eyebrow="Community"
         title="Available posts"
-        description="Up to 9 recent community posts."
+        description="Recent community posts."
         action={<Link to="/community" className="text-sm font-semibold text-[var(--accent-strong)]">Open community</Link>}
       >
         {postsLoading ? (
